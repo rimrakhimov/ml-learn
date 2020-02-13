@@ -1,0 +1,53 @@
+fun impFact n =
+	let val resultp = ref 1
+			and ip = ref 0
+	in while !ip < n do (ip := !ip + 1;
+											 resultp := !resultp * !ip);
+		 !resultp
+	end;
+
+fun pFact (n, resultp) =
+	let val ip = ref 0
+	in resultp := 1;
+		 while !ip < n do (ip := !ip + 1;
+		 									 resultp := !resultp * !ip)
+	end;
+
+fun initialize rs x = app (fn r => r:=x) rs;
+
+fun impSqroot a =
+	let
+		val acc = 1.0E~10
+		and xp = ref 1.0
+	in
+		while
+			let val x = !xp
+			in
+				xp := (a/x + x) / 2.0;
+				abs (x - !xp) >= acc*x
+			end
+		do ();
+		!xp
+	end;
+
+fun impFib n =
+	if n = 0 then 0
+	else if n = 1 then 1
+	else
+		let val x0 = ref 0
+				and x1 = ref 1
+				and i = ref 2
+		in
+			while !i <= n do (x0 := (!x1 before x1 := !x0 + !x1);
+												i := !i + 1);
+			!x1
+		end;
+
+fun irev l =
+	let val resultp = ref []
+			and lp = ref l
+	in while not (null (!lp)) do
+			 (resultp := hd(!lp) :: !resultp;
+			  lp := tl (!lp));
+		 !resultp
+	end;

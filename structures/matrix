@@ -1,0 +1,83 @@
+structure Matrix =
+	struct
+		fun headcol [] = []
+			| headcol ((x::xs)::rows) = x :: headcol rows;
+
+		fun tailcols [] = []
+			| tailcols ((x::xs)::rows) = xs :: tailcols rows;
+
+		fun transp [] = []
+			| transp ([]::rows) = []
+			| transp rows = headcol rows :: transp (tailcols rows);
+
+		fun dotprod([], []) = 0.0
+			| dotprod(x::xs, y::ys) = x*y + dotprod(xs, ys);
+
+		fun rowprod(row, []) = []
+			| rowprod(row, (col::cols)) =
+					dotprod (row, col) :: rowprod (row, cols);
+
+		fun rowlistprod ([], cols) = []
+			| rowlistprod (row::rows, cols) =
+					rowprod (row, cols) :: rowlistprod (rows, cols);
+
+		fun matprod (A, B) = rowlistprod (A, transp B);
+
+		fun rowneg [] = []
+			| rowneg ((x:real)::xs) = ~x :: rowneg xs;
+
+		fun negate [] = []
+			| negate (row::rows) = rowneg row :: negate rows;
+
+		fun addrow ([], []) = [] : real list
+			| addrow (x::xs, y::ys) = x+y :: addrow (xs, ys);
+
+		fun add ([], []) = []
+			| add (rowA::rowsA, rowB::rowsB) =
+					addrow (rowA, rowB) :: add (rowsA, rowsB);
+
+		fun pivotrow [row] = row : real list
+			| pivotrow (row1::row2::rows) =
+					if abs(hd row1) >= abs(hd row2)
+						then pivotrow (row1::rows)
+						else pivotrow (row2::rows);
+
+		fun delrow (p, []) = []
+			| delrow (p, row::rows) = if Real.==(p, hd row) then rows
+																else row :: delrow (p, rows);
+
+		fun scalarprod (k, []) = [] : real list
+			| scalarprod (k, x::xs) = k*x :: scalarprod(k, xs);
+
+		fun vectorsum ([], []) = [] : real list
+			| vectorsum (x::xs, y::ys) = x+y :: vectorsum(xs, ys);
+
+		fun gausselim [row] = [row]
+			| gausselim rows =
+					let val p::prow = pivotrow rows
+							fun elimcol [] = []
+								| elimcol ((x::xs)::rows) =
+										vectorsum(xs, scalarprod(~x/p, prow)) :: elimcol rows
+					in
+						(p::prow) :: gausselim(elimcol(delrow(p, rows)))
+					end;
+
+		fun solutions [] = [~1.0]
+			| solutions ((x::xs)::rows) =
+					let val solns = solutions rows
+					in ~(dotprod(solns, xs)/x) :: solns end;
+
+		fun rowminor (row, 1) = tl row
+			| rowminor ((x::xs), n) = x :: rowminor (xs, n-1);
+
+
+		fun minor ([], n) = []
+			| minor ((row::rows), n) = rowminor (row, n) :: minor (rows, n);
+
+(*		fun determinant ([], i, det) = det
+			| determinant (row::rows, det) =
+						if i = length row then det
+		end; *)
+
+
+	end;

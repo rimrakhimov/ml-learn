@@ -1,0 +1,50 @@
+local
+	val months =  ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+								 "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+in
+	fun dateFromString s =
+		let
+			val sday::smon::syear::_ = String.tokens (fn c => c = #"-") s
+			val SOME day = Int.fromString sday
+			val mon = String.substring (smon, 0, 3)
+			val SOME year = Int.fromString syear
+		in
+			if List.exists (fn m => m = mon) months
+				then SOME (day, mon, year)
+				else NONE
+		end
+		handle Subscript => NONE
+				 | Bind => NONE;
+end;
+
+fun writeCheque w (dols, cents) =
+			String.concat [
+				"$",
+				StringCvt.padLeft #"*" (w-4) (Int.toString dols),
+				".",
+				StringCvt.padLeft #"0" 2 (Int.toString cents)
+			];
+
+fun toUpper "" = ""
+	| toUpper s =
+			let
+				val chars = explode s
+			in
+				implode (map (fn x => (if Char.isAlpha x
+																			then Char.toUpper x
+																			else x)) chars)
+			end;
+
+fun promptInitials (is, os) =
+	while (TextIO.output (os, "Input line? ");
+				 TextIO.flushOut os;
+				 not (TextIO.endOfStream is))
+	do TextIO.output (os, "Initials: " ^
+												initials (TextIO.inputLine is) ^ "\n");
+
+fun promptInitials (is, os) =
+	while (TextIO.output(os, "Input line? ");
+				 TextIO.flushOut os;
+				 not (TextIO.endOfStream is))
+	do TextIO.output(os, "Initials: " ^
+				 								initials(TextIO.inputLine is) ^ "\n");

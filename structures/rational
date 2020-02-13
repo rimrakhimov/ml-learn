@@ -1,0 +1,13 @@
+use "algorithms";
+use "arith_sig";
+
+structure Rational : ARITH =
+	struct
+		type t = int * int;
+		val zero = (0, 1);
+		fun sum ((n, d), (n', d')) = fraction (n*d' + n'*d, d*d');
+		fun diff ((n, d), (n', d')) = sum((n, d), (~n', d'));
+		fun prod ((n, d), (n', d')) = fraction (n*n', d*d');
+		fun recip (n, d) = if n<0 then (~d, ~n) else (d, n);
+		fun quo (r, r') = prod (r, recip r');
+	end;

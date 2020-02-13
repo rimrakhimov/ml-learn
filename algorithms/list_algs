@@ -1,0 +1,46 @@
+fun change (coinvals, 0) = []
+	| change (c::coinvals, amount) =
+		if amount<c then change(coinvals, amount)
+								else c :: change(c::coinvals, amount-c);
+
+exception Change;
+fun backChange (coinvals, 0) = []
+	| backChange ([], amount) = raise Change
+	| backChange (c::coinvals, amount) =
+			if amount < 0 then raise Change
+			else c :: backChange(c::coinvals, amount-c)
+					handle Change => backChange(coinvals, amount);
+
+fun allChange (coins, coinvals, 0) = [coins]
+	| allChange (coins, [], amount) = []
+	| allChange (coins, c::coinvals, amount) =
+		if amount<0 then []
+		else allChange(c::coins, c::coinvals, amount-c) @
+				 allChange(coins, coinvals, amount);
+
+fun allChange2 (coins, coinvals, 0, coinlist) = coins :: coinlist
+		| allChange2 (coins, [], amount, coinlist) = coinlist
+		| allChange2 (coins, c::coinvals, amount, coinlist) =
+			if amount < 0 then coinlist
+			else allChange2(c::coins, c::coinvals, amount-c,
+				allChange2(coins, coinvals, amount, coinlist));
+
+fun allChangef (coins, coinvals, 0) = [coins]
+	| allChangef (coins, [], amount) = []
+	| allChangef (coins, c::coinvals, amount) =
+		if amount<0 then []
+		else allChangef(c::coins, coinvals, amount-c) @
+				 allChangef(coins, coinvals, amount);
+
+local
+	fun bincarry (0, ps) = ps
+		| bincarry (1, []) = [1]
+		| bincarry (1, p::ps) = (1-p) :: bincarry(p, ps)
+in
+	fun binsum (c, [], qs) = bincarry (c, qs)
+		| binsum (c, ps, []) = bincarry (c, ps)
+		| binsum (c, p::ps, q::qs) =
+			((c+p+q) mod 2) :: binsum((c+p+q) div 2, ps, qs)
+end;
+
+

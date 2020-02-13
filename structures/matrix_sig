@@ -1,0 +1,4 @@
+singature MATRIX =
+	sig
+		fun transp
+	end;

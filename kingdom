@@ -1,0 +1,34 @@
+datatype person = King
+								| Peer of string*string*int
+								|	Knight of string
+								| Esquire of string*string
+								| Peasant of string;
+
+fun title King = "His Majesty the King"
+	| title (Peer(deg, terr, _)) = "The " ^ deg ^ " of " ^ terr
+	| title (Knight name) = "Sir " ^ name
+	| title (Esquire (name, vill)) = name ^ ", Esq., of " ^ vill
+	| title (Peasant name) = name;
+
+fun sirs [] = []
+	| sirs ((Knight s) :: ps) = s :: sirs ps
+	| sirs (p::ps) = sirs ps;
+
+fun superior (_, King) = false
+	| superior (King, _) = true
+	| superior (_, Peer _) = false
+	| superior (Peer _, _) = true
+	| superior (_, Knight _) = false
+	| superior (Knight _, _) = true
+	| superior (_, Esquire _) = false
+	| superior (Esquire _, _) = true
+	| superior (_, _) = false;
+
+fun rank (King) = 4
+	| rank (Peer _) = 3
+	| rank (Knight _) = 2
+	| rank (Esquire _) = 1
+	| rank (Peasant _) = 0;
+
+fun superior' (per1, per2) = rank per1 > rank per2;
+

@@ -1,0 +1,68 @@
+signature RINGBUF =
+	sig
+		eqtype 'a t
+		exception Empty
+		val empty			: unit -> 'a t
+		val null			: 'a t -> bool
+		val label			: 'a t -> 'a
+		val moveLeft	: 'a t -> unit
+		val moveRight	: 'a t -> unit
+		val insert		: 'a t * 'a -> unit
+		val delete		: 'a t -> 'a
+	end;
+
+structure RingBuf :> RINGBUF =
+	struct
+		datatype 'a buf = Nil | Node of 'a buf ref * 'a * 'a buf ref;
+		datatype 'a t = Ptr of 'a buf ref;
+		exception Empty;
+
+		fun left (Node(lp, _, _)) = lp
+			| left Nil = raise Empty;
+
+		fun right (Node(_, _, rp)) = rp
+			| right Nil = raise Empty;
+
+		fun empty() = Ptr(ref Nil);
+
+		fun null (Ptr p) = case !p of
+													Nil => true
+												| Node (_, x, _) => false;
+
+		fun label (Ptr p) = case !p of
+													Nil => raise Empty
+												| Node (_, x, _) => x;
+
+		fun moveLeft (Ptr p) = (p := !(left(!p)));
+		fun moveRight (Ptr p) = (p := !(right(!p)));
+
+		fun insert (Ptr p, x) =
+					case !p of
+							Nil =>
+								let
+									val lp = ref Nil
+									and rp = ref Nil
+									val new = Node (lp, x, rp)
+								in
+									lp := new;
+									rp := new;
+									p := new
+								end
+						| Node (lp, _, _) =>
+								let
+									val new = Node(ref(!lp), x, ref(!p))
+								in
+									right(!lp) := new;
+									lp := new
+								end;
+
+		fun delete (Ptr p) =
+					case !p of
+							Nil => raise Empty
+						| Node (lp, x, rp) =>
+								(if left(!lp) = lp then p := Nil
+								 else (right(!lp) := !rp;
+								 			 left (!rp) := !lp;
+											 p := !rp);
+								 x)
+	end;

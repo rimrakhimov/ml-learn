@@ -1,0 +1,29 @@
+use "arith_sig";
+
+structure Bin : ARITH =
+	struct
+		type t = int list;
+
+		val zero = [];
+
+		fun carry (0, ps) = ps
+			| carry (1, []) = [1]
+			| carry (1, p::ps) = (1-p) :: carry(p, ps);
+
+		local
+			fun sumc (c, [], qs) = carry (c, qs)
+				| sumc (c, ps, []) = carry (c, ps)
+				| sumc (c, p::ps, q::qs) =
+					((c+p+q) mod 2) :: sumc((c+p+q) div 2, ps, qs)
+		in
+			fun sum (ps, qs) = sumc (0, ps, qs)
+		end;
+
+		fun prod ([], _) = []
+			| prod (0::ps, qs) = 0::prod(ps, qs)
+			| prod (1::ps, qs) = sum(qs, 0::prod(ps, qs));
+
+		fun quo (n, r) = n : t;
+		fun diff (n, r) = n : t;
+
+	end;

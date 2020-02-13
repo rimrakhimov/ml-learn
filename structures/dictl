@@ -1,0 +1,35 @@
+use "dict_sig";
+
+structure Dict : DICTIONARY =
+	struct
+		type key = string;
+		type 'a t = (key * 'a) list;
+
+		exception E of key;
+
+		val empty = nil;
+
+		fun lookup ([], b) = raise E b
+			| lookup ((a,x)::xs, b) =
+					(case String.compare (a, b) of
+							GREATER => raise E b
+						| EQUAL => x
+						| LESS => lookup(xs, b)
+					);
+
+		fun insert ([], b, y) = [(b, y)]
+		  | insert ((a,x)::xs, b, y) =
+					(case String.compare (a, b) of
+							GREATER => (b, y) :: (a, x) :: xs
+						|	EQUAL => raise E b
+						| LESS => (a, x) :: insert (xs, b, y)
+					);
+
+		fun update ([], b, y) = [(b, y)]
+			| update ((a,x)::xs, b, y) =
+					(case String.compare (a, b) of
+							GREATER => (b, y) :: (a, x) :: xs
+						| EQUAL => (a, y) :: xs
+						| LESS => (a, x) :: update (xs, b, y)
+					);
+	end;

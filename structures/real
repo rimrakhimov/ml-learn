@@ -1,0 +1,11 @@
+use "arith_sig";
+
+structure Real : ARITH =
+	struct
+		type t = real;
+		val zero = 0.0;
+		fun sum (a, b) = a + b : t
+		fun diff (a, b) = a - b : t;
+		fun prod (a, b) = a * b : t;
+		fun quo (a, b) = a / b : t;
+	end;

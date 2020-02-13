@@ -1,0 +1,24 @@
+structure Graph =
+	struct
+		infix mem;
+		fun (e mem []) = false
+			| (e mem (x::xs)) = (e = x) orelse (e mem xs);
+
+		fun nexts (a, []) = []
+			| nexts (a, (x,y)::pairs) =
+					if a=x then y :: nexts(a, pairs)
+								 else nexts(a, pairs);
+
+		fun depthf ([], graph, visited) = rev visited
+			| depthf (x::xs, graph, visited) =
+					if x mem visited then depthf (xs, graph, visited)
+					else depthf (nexts(x, graph) @ xs, graph, x::visited);
+
+		fun depth ([], graph, visited) = visited
+			| depth (x::xs, graph, visited) =
+					depth (xs, graph,
+								 if x mem visited then visited
+								 else depth (nexts(x, graph), graph, x::visited));
+
+
+	end;

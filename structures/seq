@@ -1,0 +1,109 @@
+datatype 'a seq = Nil | Cons of 'a * (unit -> 'a seq);
+
+signature SEQUENCE =
+	sig
+		type 'a seq
+		exception Empty
+		exception Subscript
+		val cons : 'a * 'a seq -> 'a seq
+		val null : 'a seq -> bool
+		val hd : 'a seq -> 'a
+		val tl : 'a seq -> 'a seq
+		val fromList : 'a list -> 'a seq
+		val toList : 'a seq -> 'a list
+		val take : 'a seq * int -> 'a list
+		val drop : 'a seq * int -> 'a seq
+		val @ : 'a seq * 'a seq -> 'a seq
+		val interleave : 'a seq * 'a seq -> 'a seq
+		val map : ('a -> 'b) -> 'a seq -> 'b seq
+		val filter : ('a -> bool) -> 'a seq -> 'a seq
+		val iterates : ('a -> 'a) -> 'a -> 'a seq
+
+		val from : int -> int seq
+(*		val repelt : int * 'a seq -> 'a seq
+		val takewhile : ('a -> bool) -> 'a seq -> 'a seq
+		val dropwhile : ('a -> bool) -> 'a seq -> 'a seq
+*)
+	end;
+
+structure Seq : SEQUENCE =
+	struct
+
+		type 'a seq = 'a seq;
+
+		exception Empty;
+		exception Subscript;
+
+		fun null Nil = true
+			| null (Cons _) = false;
+
+		fun hd (Cons(x, xf)) = x
+			| hd Nil = raise Empty;
+
+		fun tl (Cons(x, xf)) = xf()
+			| tl Nil = raise Empty;
+
+		fun cons(x, xq) = Cons(x, fn() => xq);
+
+		fun fromList l = List.foldr cons Nil l;
+
+		fun toList Nil = []
+			| toList (Cons(x, xf)) = x :: toList (xf());
+
+		fun from k = Cons(k, fn()=>from(k+1));
+
+		fun take (xq, 0) = []
+			| take (Nil, n) = raise Subscript
+			| take (Cons(x, xf), n) = x :: take (xf(), n-1);
+
+		fun drop (xq, 0) = xq
+			| drop (Nil, n) = raise Subscript
+			| drop (Cons(x, xf), n) = drop (xf(), n-1)
+
+		fun squares Nil : int seq = Nil
+			| squares (Cons(x, xf)) = Cons(x*x, fn()=>squares(xf()));
+
+		fun add (Cons(x, xf), Cons(y, yf)) =
+					Cons(x+y, fn() => add(xf(), yf()))
+			| add _ : int seq = Nil;
+
+		fun Nil @ yq = yq
+			| (Cons(x, xf)) @ yq = Cons(x, fn() => (xf()) @ yq);
+
+		fun interleave (Nil, yq) = yq
+			| interleave (Cons(x, xf), yq) =
+					Cons (x, fn() => interleave (yq, xf()));
+
+		fun map f Nil = Nil
+			| map f (Cons(x, xf)) = Cons(f x, fn() => map f (xf()));
+
+		fun filter pred Nil = Nil
+			| filter pred (Cons(x, xf)) =
+					if pred x then Cons(x, fn() => filter pred (xf()))
+										else filter pred (xf());
+
+		fun iterates f x = Cons(x, fn() => iterates f  (f x));
+
+		fun repelt (k, Nil) = Nil
+			| repelt (k, (Cons(x, xf))) =
+					let fun rp 0 = repelt (k, (xf ()))
+								| rp k = Cons(x, fn() => rp (k-1))
+					in rp k end;
+
+			fun addaj Nil = Nil
+				| addaj (Cons(x, xf)) =
+						case xf() of Nil => Cons(x, xf)
+							 | Cons(y, yf) => Cons(x + y, fn() => addaj (yf()));
+
+			fun takewhile pred Nil = Nil
+				| takewhile pred (Cons(x, xf)) =
+						if pred x then (Cons(x, fn() => takewhile pred (xf())))
+											else Nil;
+
+			fun dropwhile pred Nil = Nil
+				| dropwhile pred (Cons(x, xf)) =
+						if pred x then dropwhile pred (xf())
+											else (Cons(x, xf));
+
+
+	end;

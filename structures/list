@@ -1,0 +1,72 @@
+structure List =
+	struct
+		fun upto(m, n) =
+			if m > n then nil else m :: upto(m+1, n);
+
+		fun prod [] = 1
+			| prod (n :: ns) = n * prod ns;
+
+		fun max [m] = m
+			| max (m::n::ns) = if m > n then max(m::ns)
+																	else max(n::ns);
+
+		fun null [] = true
+			| null (_::_) = false;
+
+		fun hd (x::_) = x;
+
+		fun tl (_::xs) = xs;
+
+		fun last [m] = m
+			| last (_::ns) = last ns;
+
+		local
+			fun addlen(n, []) = n
+				| addlen(n, (_::xs)) = addlen (n+1, xs)
+		in
+			fun length l = addlen(0, l);
+		end;
+
+		fun take ([], i) = []
+			| take (x::xs, i) = if i>0 then x::take(xs, i-1)
+																 else [];
+
+		fun rtake([], _, taken) = taken
+			| rtake(x::xs, i, taken) =
+				if i > 0 then rtake(xs, i-1, x::taken)
+								 else taken;
+
+		fun drop([], _) = []
+			| drop (x::xs, i) =
+				if i > 0 then drop (xs, i-1)
+								 else x::xs;
+
+		fun nth (l, n) = hd(drop (l, n));
+
+	  infixr 5 @;
+		fun ([] @ ys) = ys
+			| (xs @ []) = xs
+			| ((x::xs) @ ys) = x :: (xs@ys);
+
+		local
+			fun revAppend ([], ys) = ys
+				| revAppend (x::xs, ys) = revAppend(xs, x::ys)
+		in
+			fun rev (l) = revAppend(l, [])
+		end;
+
+		fun concat [] = []
+			| concat (l::ls) = l @ concat ls;
+
+		fun zip(x::xs, y::ys) = (x, y) :: zip(xs, ys)
+			| zip _ = [];
+
+
+		fun unzip [] = ([], [])
+			| unzip ((x, y)::pairs) =
+				let val (xs, ys) = unzip pairs
+				in
+					(x::xs, y::ys)
+				end;
+
+	end;
