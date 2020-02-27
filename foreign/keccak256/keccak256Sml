@@ -1,0 +1,39 @@
+open Foreign;
+
+val keccak256_lib = loadLibrary "./keccak256.so";
+
+val c1 = buildCall0((getSymbol keccak256_lib "createKeccak256HashStorage"), (), cPointer);
+
+val c2 = buildCall2((getSymbol keccak256_lib "keccak_int"), (cPointer, cInt), cVoid);
+
+val c3 = buildCall2((getSymbol keccak256_lib "getHashStorage"), (cPointer, cInt), cUint8);
+
+val c4 = buildCall1((getSymbol keccak256_lib "destroyKeccak256HashStorage"), (cPointer), cVoid);
+
+fun c_createHashResultArray() = c1();
+fun c_keccak256_int(hash, data) = c2 (hash, data);
+fun c_getHashStorage(hash, index) = c3 (hash, index);
+fun c_destroyHashResultArray(hash) = c4 (hash);
+
+val data = 125;
+val hash = c_createHashResultArray();
+
+fun keccak256_int (hash, data : int) =
+	c_keccak256_int (hash, data);
+
+fun printHash hash =
+	let
+		fun print_hash 32 = ()
+			| print_hash i =
+					let val _ = ()
+					in
+						print(Int.toString (c_getHashStorage(hash, i)));
+						print(" ");
+						print_hash (i+1)
+					end
+	in
+		print_hash 0
+	end;
+
+fun destroy_hash hash = c_destroyHashResultArray (hash);
+
